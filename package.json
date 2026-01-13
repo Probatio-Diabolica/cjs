@@ -1,0 +1,7 @@
+{
+  "name": "cjs",
+  "type": "module",
+  "bin": {
+    "cjs": "./bin/cjs.js"
+  }
+}
