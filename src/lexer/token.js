@@ -20,6 +20,7 @@ export const TokenType = {
   RBRACE: "}",
   SEMI: ";",
   COMMA: ",",
+  ASSIGN: "=",
 
   EOF: "EOF"
 };

@@ -67,7 +67,8 @@ export default function lex(source) {
       "{": TokenType.LBRACE,
       "}": TokenType.RBRACE,
       ";": TokenType.SEMI,
-      ",": TokenType.COMMA
+      ",": TokenType.COMMA,
+      "=": TokenType.ASSIGN
     };
 
     if (singles[ch]) {

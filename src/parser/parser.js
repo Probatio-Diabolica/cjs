@@ -6,8 +6,11 @@ import {
   IfStmt,
   ReturnStmt,
   NumberLiteral,
-  BinaryExpr
+  BinaryExpr,
+  VarDecl,
+  Identifier
 } from "./ast.js";
+
 
 
 // implemets classic recursive-descent precedence parsing
@@ -56,14 +59,21 @@ export default class Parser {
     }
 
     parseStatement() {
+        if (this.peek().type === TokenType.INT) {
+            return this.parseVarDecl();
+        }
+
         if (this.peek().type === TokenType.IF) {
-        return this.parseIf();
+            return this.parseIf();
         }
+
         if (this.peek().type === TokenType.RETURN) {
-        return this.parseReturn();
+            return this.parseReturn();
         }
+
         throw new Error("Unknown statement");
     }
+
 
     parseIf() {
         this.expect(TokenType.IF);
@@ -72,6 +82,21 @@ export default class Parser {
         this.expect(TokenType.RPAREN);
         return new IfStmt(cond, this.parseStatement());
     }
+
+    parseVarDecl() {
+        this.expect(TokenType.INT);
+        const name = this.expect(TokenType.IDENT).value;
+
+        let init = null;
+        if (this.peek().type === TokenType.ASSIGN) {
+            this.advance();
+            init = this.parseExpression();
+        }
+
+        this.expect(TokenType.SEMI);
+        return new VarDecl(name, init);
+    }
+
 
     parseReturn() {
         this.expect(TokenType.RETURN);
@@ -115,18 +140,26 @@ export default class Parser {
     }
 
     parsePrimary() {
-    if (this.peek().type === TokenType.NUMBER) {
-        return new NumberLiteral(Number(this.advance().value));
+        if (this.peek().type === TokenType.NUMBER) {
+            return new NumberLiteral(Number(this.advance().value));
+        }
+
+        if (this.peek().type === TokenType.IDENT) {
+            return new Identifier(this.advance().value);
+        }
+
+        if (this.peek().type === TokenType.LPAREN) {
+            this.advance();
+            const expr = this.parseExpression();
+            this.expect(TokenType.RPAREN);
+            return expr;
+        }
+
+        throw new Error("Expected expression");
     }
 
-    if (this.peek().type === TokenType.LPAREN) {
-        this.advance();
-        const expr = this.parseExpression();
-        this.expect(TokenType.RPAREN);
-        return expr;
-    }
-
-    throw new Error("Expected expression");
-    }
 
 }
+
+
+

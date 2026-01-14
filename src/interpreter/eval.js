@@ -1,3 +1,4 @@
+import Environment from "./environment.js";
 import {
   Program,
   FunctionDecl,
@@ -5,8 +6,11 @@ import {
   IfStmt,
   ReturnStmt,
   NumberLiteral,
-  BinaryExpr
+  BinaryExpr,
+  VarDecl,
+  Identifier
 } from "../parser/ast.js";
+
 
 
 class ReturnSignal {
@@ -25,48 +29,63 @@ export default class Evaluator {
     }
 
     evalFunction(fn) {
+        const env = new Environment();
+
         try {
-        this.evalBlock(fn.body);
+            this.evalBlock(fn.body, env);
         } catch (e) {
-        if (e instanceof ReturnSignal) {
+            if (e instanceof ReturnSignal) {
             return e.value;
+            }
+            throw e;
         }
-        throw e;
-        }
+
         return 0;
     }
 
-    evalBlock(block) {
+
+    evalBlock(block, env) {
         for (const stmt of block.statements) {
-        this.evalStatement(stmt);
+            this.evalStatement(stmt, env);
         }
     }
 
-    evalStatement(stmt) {
-        if (stmt instanceof IfStmt) {
-        const cond = this.evalExpression(stmt.condition);
-        if (cond !== 0) {
-            this.evalStatement(stmt.thenBranch);
+
+    evalStatement(stmt, env) {
+        if (stmt instanceof VarDecl) {
+            const value = stmt.init ? this.evalExpression(stmt.init, env) : 0;
+            env.define(stmt.name, value);
+            return;
         }
-        return;
+
+        if (stmt instanceof IfStmt) {
+            const cond = this.evalExpression(stmt.condition, env);
+            if (cond !== 0) {
+            this.evalStatement(stmt.thenBranch, env);
+            }
+            return;
         }
 
         if (stmt instanceof ReturnStmt) {
-        const value = this.evalExpression(stmt.value);
-        throw new ReturnSignal(value);
+            const value = this.evalExpression(stmt.value, env);
+            throw new ReturnSignal(value);
         }
 
         throw new Error("Unknown statement type");
     }
 
-    evalExpression(expr) {
+    evalExpression(expr, env) {
         if (expr instanceof NumberLiteral) {
             return expr.value;
         }
 
+        if (expr instanceof Identifier) {
+            return env.get(expr.name);
+        }
+
         if (expr instanceof BinaryExpr) {
-            const left = this.evalExpression(expr.left);
-            const right = this.evalExpression(expr.right);
+            const left = this.evalExpression(expr.left, env);
+            const right = this.evalExpression(expr.right, env);
 
             switch (expr.operator) {
             case "+":
@@ -82,5 +101,6 @@ export default class Evaluator {
 
         throw new Error("Unknown expression");
     }
+
 
 }
