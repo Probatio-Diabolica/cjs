@@ -18,10 +18,11 @@ export class Block {
 }
 
 export class IfStmt {
-    constructor(condition, thenBranch) {
-        this.condition = condition;
-        this.thenBranch = thenBranch;
-    }
+  constructor(condition, thenBranch, elseBranch = null) {
+      this.condition = condition;
+      this.thenBranch = thenBranch;
+      this.elseBranch = elseBranch;
+  }
 }
 
 export class ReturnStmt {
@@ -59,3 +60,4 @@ export class BinaryExpr {
         this.right = right;
     }
 }
+

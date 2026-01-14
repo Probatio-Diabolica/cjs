@@ -65,9 +65,13 @@ export default class Evaluator {
 
         if (stmt instanceof IfStmt) {
             const cond = this.evalExpression(stmt.condition, env);
+            
             if (cond !== 0) {
-            this.evalStatement(stmt.thenBranch, env);
+                this.evalStatement(stmt.thenBranch, env);
+            }else if (stmt.elseBranch) {
+                this.evalStatement(stmt.elseBranch, env);
             }
+
             return;
         }
 

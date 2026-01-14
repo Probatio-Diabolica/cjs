@@ -85,7 +85,16 @@ export default class Parser {
         this.expect(TokenType.LPAREN);
         const cond = this.parseExpression();
         this.expect(TokenType.RPAREN);
-        return new IfStmt(cond, this.parseStatement());
+        
+        const thenBranch = this.parseStatement();
+        let elseBranch = null;
+
+        if (this.peek().type === TokenType.ELSE) {
+            this.advance();
+            elseBranch = this.parseStatement();
+        }
+
+        return new IfStmt(cond, thenBranch, elseBranch);
     }
 
     parseVarDecl() {
