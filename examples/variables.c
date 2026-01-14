@@ -1,5 +1,11 @@
 int main() {
-    int x = 5;
-    int y = x + 2;
-    return y;
+    int a = 5;
+    int b = 10;
+    int c = a + b * 2;
+
+    if (c) {
+        return c;
+    }
+
+    return 0;
 }

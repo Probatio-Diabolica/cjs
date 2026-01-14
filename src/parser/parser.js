@@ -59,6 +59,10 @@ export default class Parser {
     }
 
     parseStatement() {
+        if (this.peek().type === TokenType.LBRACE) {
+            return this.parseBlock();
+        }
+
         if (this.peek().type === TokenType.INT) {
             return this.parseVarDecl();
         }
@@ -73,6 +77,7 @@ export default class Parser {
 
         throw new Error("Unknown statement");
     }
+
 
 
     parseIf() {
@@ -106,22 +111,22 @@ export default class Parser {
     }
 
     parseExpression() {
-    return this.parseAdditive();
+        return this.parseAdditive();
     }
 
     parseAdditive() {
-    let expr = this.parseMultiplicative();
+        let expr = this.parseMultiplicative();
 
-    while (
-        this.peek().type === TokenType.PLUS ||
-        this.peek().type === TokenType.MINUS
-    ) {
-        const op = this.advance().type;
-        const right = this.parseMultiplicative();
-        expr = new BinaryExpr(expr, op, right);
-    }
+        while (
+            this.peek().type === TokenType.PLUS ||
+            this.peek().type === TokenType.MINUS
+        ) {
+            const op = this.advance().type;
+            const right = this.parseMultiplicative();
+            expr = new BinaryExpr(expr, op, right);
+        }
 
-    return expr;
+        return expr;
     }
 
     parseMultiplicative() {

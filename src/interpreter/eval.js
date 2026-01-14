@@ -52,6 +52,11 @@ export default class Evaluator {
 
 
     evalStatement(stmt, env) {
+        if (stmt instanceof Block) {
+            this.evalBlock(stmt, env);
+            return;
+        }
+
         if (stmt instanceof VarDecl) {
             const value = stmt.init ? this.evalExpression(stmt.init, env) : 0;
             env.define(stmt.name, value);
@@ -73,6 +78,7 @@ export default class Evaluator {
 
         throw new Error("Unknown statement type");
     }
+
 
     evalExpression(expr, env) {
         if (expr instanceof NumberLiteral) {
