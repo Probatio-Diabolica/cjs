@@ -69,3 +69,15 @@ export class BinaryExpr {
     }
 }
 
+
+////////////////////////////////////////////////////////////////////////
+//loops
+
+export class WhileStmt {
+    constructor(condition, body) {
+        this.condition = condition;
+        this.body = body;
+    }
+}
+
+

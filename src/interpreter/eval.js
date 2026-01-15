@@ -2,6 +2,7 @@ import Environment from "./environment.js";
 import {
   Program,
   FunctionDecl,
+  WhileStmt,
   Block,
   IfStmt,
   ReturnStmt,
@@ -82,6 +83,15 @@ export default class Evaluator {
 
             return;
         }
+
+        if (stmt instanceof WhileStmt) {
+            while (this.evalExpression(stmt.condition, env) !== 0) {
+                this.evalStatement(stmt.body, env);
+            }
+            
+            return;
+        }
+
 
         if (stmt instanceof ReturnStmt) {
             const value = this.evalExpression(stmt.value, env);

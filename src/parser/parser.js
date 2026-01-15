@@ -9,7 +9,8 @@ import {
     BinaryExpr,
     VarDecl,
     Identifier,
-    Assignment
+    Assignment,
+    WhileStmt
 } from "./ast.js";
 
 
@@ -84,18 +85,34 @@ export default class Parser {
             return this.parseReturn();
         }
 
+        if (this.peek().type === TokenType.WHILE) {
+            return this.parseWhile();
+        }
         throw new Error("Unknown statement");
     }
 
+    parseWhile() {
+        this.expect(TokenType.WHILE);
+
+        this.expect(TokenType.LPAREN);
+        const condition = this.parseExpression();
+        
+        this.expect(TokenType.RPAREN);
+        const body = this.parseStatement();
+
+        return new WhileStmt(condition, body);
+    }
 
 
     parseIf() {
         this.expect(TokenType.IF);
+        
         this.expect(TokenType.LPAREN);
         const cond = this.parseExpression();
-        this.expect(TokenType.RPAREN);
         
+        this.expect(TokenType.RPAREN);
         const thenBranch = this.parseStatement();
+        
         let elseBranch = null;
 
         if (this.peek().type === TokenType.ELSE) {
