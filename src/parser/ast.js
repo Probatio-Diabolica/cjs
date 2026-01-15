@@ -18,11 +18,11 @@ export class Block {
 }
 
 export class IfStmt {
-  constructor(condition, thenBranch, elseBranch = null) {
-      this.condition = condition;
-      this.thenBranch = thenBranch;
-      this.elseBranch = elseBranch;
-  }
+    constructor(condition, thenBranch, elseBranch = null) {
+        this.condition = condition;
+        this.thenBranch = thenBranch;
+        this.elseBranch = elseBranch;
+    }
 }
 
 export class ReturnStmt {
@@ -49,6 +49,14 @@ export class Identifier {
         this.name = name;
     }
 }
+
+export class Assignment {
+    constructor(name, value) {
+        this.name = name;
+        this.value = value;
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 // arithmetics

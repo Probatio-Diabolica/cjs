@@ -1,15 +1,17 @@
 import { TokenType } from "../lexer/token.js";
 import {
-  Program,
-  FunctionDecl,
-  Block,
-  IfStmt,
-  ReturnStmt,
-  NumberLiteral,
-  BinaryExpr,
-  VarDecl,
-  Identifier
+    Program,
+    FunctionDecl,
+    Block,
+    IfStmt,
+    ReturnStmt,
+    NumberLiteral,
+    BinaryExpr,
+    VarDecl,
+    Identifier,
+    Assignment
 } from "./ast.js";
+
 
 
 
@@ -51,10 +53,13 @@ export default class Parser {
     parseBlock() {
         this.expect(TokenType.LBRACE);
         const stmts = [];
+
         while (this.peek().type !== TokenType.RBRACE) {
-        stmts.push(this.parseStatement());
+            stmts.push(this.parseStatement());
         }
+
         this.expect(TokenType.RBRACE);
+        
         return new Block(stmts);
     }
 
@@ -69,6 +74,10 @@ export default class Parser {
 
         if (this.peek().type === TokenType.IF) {
             return this.parseIf();
+        }
+
+        if ( this.peek().type === TokenType.IDENT && this.tokens[this.pos + 1]?.type === TokenType.ASSIGN) {
+            return this.parseAssignment();
         }
 
         if (this.peek().type === TokenType.RETURN) {
@@ -158,18 +167,27 @@ export default class Parser {
     }
 
     parseMultiplicative() {
-    let expr = this.parsePrimary();
+        let expr = this.parsePrimary();
 
-    while (
-        this.peek().type === TokenType.STAR ||
-        this.peek().type === TokenType.SLASH
-    ) {
-        const op = this.advance().type;
-        const right = this.parsePrimary();
-        expr = new BinaryExpr(expr, op, right);
+        while (
+            this.peek().type === TokenType.STAR ||
+            this.peek().type === TokenType.SLASH
+        ) {
+            const op = this.advance().type;
+            const right = this.parsePrimary();
+            expr = new BinaryExpr(expr, op, right);
+        }
+
+        return expr;
     }
 
-    return expr;
+    parseAssignment() {
+        const name = this.expect(TokenType.IDENT).value;
+        this.expect(TokenType.ASSIGN);
+        const value = this.parseExpression();
+        this.expect(TokenType.SEMI);
+        
+        return new Assignment(name, value);
     }
 
     parsePrimary() {

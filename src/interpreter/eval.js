@@ -8,8 +8,10 @@ import {
   NumberLiteral,
   BinaryExpr,
   VarDecl,
-  Identifier
+  Identifier,
+  Assignment
 } from "../parser/ast.js";
+
 
 
 
@@ -60,6 +62,12 @@ export default class Evaluator {
         if (stmt instanceof VarDecl) {
             const value = stmt.init ? this.evalExpression(stmt.init, env) : 0;
             env.define(stmt.name, value);
+            return;
+        }
+
+        if (stmt instanceof Assignment) {
+            const value = this.evalExpression(stmt.value, env);
+            env.set(stmt.name, value);
             return;
         }
 
