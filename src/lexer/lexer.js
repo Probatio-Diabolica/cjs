@@ -55,6 +55,25 @@ export default function lex(source) {
       continue;
     }
 
+    // two char operators
+    const twoChar = source.slice(i, i + 2);
+
+    if (twoChar === "<=" || twoChar === ">=" ||
+        twoChar === "==" || twoChar === "!=") {
+
+      const map = {
+        "<=": TokenType.LE,
+        ">=": TokenType.GE,
+        "==": TokenType.EQ,
+        "!=": TokenType.NE
+      };
+
+      add(map[twoChar], twoChar);
+      i += 2;
+      col += 2;
+      continue;
+    }
+
     // single-char tokens
     const singles = {
       "+": TokenType.PLUS,
@@ -68,7 +87,9 @@ export default function lex(source) {
       "}": TokenType.RBRACE,
       ";": TokenType.SEMI,
       ",": TokenType.COMMA,
-      "=": TokenType.ASSIGN
+      "=": TokenType.ASSIGN,
+      "<": TokenType.LT,
+      ">": TokenType.GT
     };
 
     if (singles[ch]) {

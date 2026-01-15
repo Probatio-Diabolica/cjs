@@ -22,6 +22,14 @@ export const TokenType = {
   COMMA: ",",
   ASSIGN: "=",
 
+  //comparators
+  LT: "<",
+  GT: ">",
+  LE: "<=",
+  GE: ">=",
+  EQ: "==",
+  NE: "!=",
+
   EOF: "EOF"
 };
 

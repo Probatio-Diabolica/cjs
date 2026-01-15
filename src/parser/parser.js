@@ -120,8 +120,27 @@ export default class Parser {
     }
 
     parseExpression() {
-        return this.parseAdditive();
+        return this.parseComparison();
     }
+
+    parseComparison() {
+        let expr = this.parseAdditive();
+
+        while (
+            this.peek().type === TokenType.LT ||
+            this.peek().type === TokenType.GT ||
+            this.peek().type === TokenType.LE ||
+            this.peek().type === TokenType.GE ||
+            this.peek().type === TokenType.EQ ||
+            this.peek().type === TokenType.NE   ) {
+            const op = this.advance().type;
+            const right = this.parseAdditive();
+            expr = new BinaryExpr(expr, op, right);
+        }
+
+        return expr;
+    }
+
 
     parseAdditive() {
         let expr = this.parseMultiplicative();

@@ -98,14 +98,27 @@ export default class Evaluator {
             const right = this.evalExpression(expr.right, env);
 
             switch (expr.operator) {
-            case "+":
-                return left + right;
-            case "-":
-                return left - right;
-            case "*":
-                return left * right;
-            case "/":
-                return Math.trunc(left / right);
+                case "+":
+                    return left + right;
+                case "-":
+                    return left - right;
+                case "*":
+                    return left * right;
+                case "/":
+                    return Math.trunc(left / right);
+
+                case "<":
+                    return left < right ? 1 : 0;
+                case ">":
+                    return left > right ? 1 : 0;
+                case "<=":
+                    return left <= right ? 1 : 0;
+                case ">=":
+                    return left >= right ? 1 : 0;
+                case "==":
+                    return left === right ? 1 : 0;
+                case "!=":
+                    return left !== right ? 1 : 0;
             }
         }
 
