@@ -3,7 +3,7 @@ import Parser from "../src/parser/parser.js";
 import Evaluator from "../src/interpreter/eval.js";
 
 function assert(cond, msg) {
-  if (!cond) throw new Error(msg);
+    if (!cond) throw new Error(msg);
 }
 
 function run(src) {
@@ -13,16 +13,14 @@ function run(src) {
 }
 
 assert(
-  run(`int main(){ return 1 + 2 * 3; }`) === 7,
-  "precedence failed"
-);
+    run(`
+        int add(int a, int b) {
+            return a + b;
+        }
 
-assert(
-  run(`int main(){ return (1 + 2) * 3; }`) === 9,
-  "parentheses failed"
-);
-
-assert(
-  run(`int main(){ return 5 % 2; }`) === 1,
-  "modulo failed"
+        int main() {
+            return add(2, 3);
+        }
+    `) === 5,
+    "function call failed"
 );

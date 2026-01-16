@@ -12,7 +12,8 @@ import {
     Identifier,
     Assignment,  
     BreakStmt,
-    ContinueStmt
+    ContinueStmt,
+    FunctionCall
 } from "../parser/ast.js";
 
 
@@ -28,11 +29,21 @@ class ReturnSignal {
 }
 
 export default class Evaluator {
+    
+    constructor() {
+        this.functions = new Map();
+    }
+
     evalProgram(program) {
-        const main = program.functions.find(f => f.name === "main");
-        if (!main) {
-        throw new Error("No main function");
+
+        for (const fn of program.functions) {
+            this.functions.set(fn.name, fn);
         }
+
+        const main = this.functions.get("main");
+        
+        if (!main) throw new Error("No main function");
+        
         return this.evalFunction(main);
     }
 
@@ -129,6 +140,33 @@ export default class Evaluator {
 
         if (expr instanceof Identifier) {
             return env.get(expr.name);
+        }
+
+        if (expr instanceof FunctionCall) {
+            
+            const fn = this.functions.get(expr.name);
+
+            if (!fn) throw new Error(`Undefined function '${expr.name}'`); 
+
+            if (fn.params.length !== expr.args.length) throw new Error(`Argument count mismatch in call to '${expr.name}'`);
+
+            const callEnv = new Environment();
+
+            for (let i = 0; i < fn.params.length; i++) {
+                const value = this.evalExpression(expr.args[i], env);
+                callEnv.define(fn.params[i], value);
+            }
+
+            try {
+                this.evalBlock(fn.body, callEnv);
+            } catch (e) {
+        
+                if (e instanceof ReturnSignal) return e.value;
+        
+                throw e;
+            }
+
+            return 0;
         }
 
         if (expr instanceof BinaryExpr) {

@@ -5,8 +5,9 @@ export class Program {
 }
 
 export class FunctionDecl {
-    constructor(name, body) {
+    constructor(name, params ,body) {
         this.name = name;
+        this.params = params; //it'll be the array of params
         this.body = body;
     }
 }
@@ -84,4 +85,13 @@ export class WhileStmt {
 // control block signals
 export class BreakStmt {}
 export class ContinueStmt {}
+
+///////////////////////////////////////////////////////////////////////////
+// function calls
+export class FunctionCall {
+    constructor(name, args) {
+        this.name = name;
+        this.args = args;
+    }
+}
 

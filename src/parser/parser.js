@@ -12,7 +12,8 @@ import {
     Assignment,
     WhileStmt,
     BreakStmt,
-    ContinueStmt
+    ContinueStmt,
+    FunctionCall
 } from "./ast.js";
 
 
@@ -42,15 +43,35 @@ export default class Parser {
     }
 
     parseProgram() {
-        return new Program([this.parseFunction()]);
+        const functions = [];
+        
+        while (this.peek().type !== TokenType.EOF) {
+            functions.push(this.parseFunction());
+        }
+        
+        return new Program(functions);
     }
 
     parseFunction() {
         this.expect(TokenType.INT);
         const name = this.expect(TokenType.IDENT).value;
         this.expect(TokenType.LPAREN);
+        const params = [];
+
+        if (this.peek().type !== TokenType.RPAREN) {
+            do {
+                // for now it only works for int. will support other types soon
+                this.expect(TokenType.INT);              
+                const name = this.expect(TokenType.IDENT).value;
+                params.push(name);
+            } while (this.peek().type === TokenType.COMMA && this.advance());
+        }
+
         this.expect(TokenType.RPAREN);
-        return new FunctionDecl(name, this.parseBlock());
+
+        const body = this.parseBlock();
+
+        return new FunctionDecl(name, params , body);
     }
 
     parseBlock() {
@@ -229,7 +250,26 @@ export default class Parser {
         }
 
         if (this.peek().type === TokenType.IDENT) {
-            return new Identifier(this.advance().value);
+            const name = this.advance().value;
+
+            if (this.peek().type === TokenType.LPAREN) {
+
+                this.advance(); // (
+
+                const args = [];
+
+                if (this.peek().type !== TokenType.RPAREN) {
+                    do {
+                        args.push(this.parseExpression());
+                    } while (this.peek().type === TokenType.COMMA && this.advance());
+                }
+
+                this.expect(TokenType.RPAREN);
+
+                return new FunctionCall(name, args);
+            }
+
+            return new Identifier(name);
         }
 
         if (this.peek().type === TokenType.LPAREN) {
