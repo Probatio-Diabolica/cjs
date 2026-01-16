@@ -10,7 +10,9 @@ import {
     VarDecl,
     Identifier,
     Assignment,
-    WhileStmt
+    WhileStmt,
+    BreakStmt,
+    ContinueStmt
 } from "./ast.js";
 
 
@@ -88,6 +90,19 @@ export default class Parser {
         if (this.peek().type === TokenType.WHILE) {
             return this.parseWhile();
         }
+
+        if (this.peek().type === TokenType.BREAK) {
+            this.advance();
+            this.expect(TokenType.SEMI);
+            return new BreakStmt();
+        }
+
+        if (this.peek().type === TokenType.CONTINUE) {
+            this.advance();
+            this.expect(TokenType.SEMI);
+            return new ContinueStmt();
+        }
+
         throw new Error("Unknown statement");
     }
 

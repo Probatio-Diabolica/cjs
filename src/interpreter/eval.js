@@ -1,20 +1,25 @@
 import Environment from "./environment.js";
 import {
-  Program,
-  FunctionDecl,
-  WhileStmt,
-  Block,
-  IfStmt,
-  ReturnStmt,
-  NumberLiteral,
-  BinaryExpr,
-  VarDecl,
-  Identifier,
-  Assignment
+    Program,
+    FunctionDecl,
+    WhileStmt,
+    Block,
+    IfStmt,
+    ReturnStmt,
+    NumberLiteral,
+    BinaryExpr,
+    VarDecl,
+    Identifier,
+    Assignment,  
+    BreakStmt,
+    ContinueStmt
 } from "../parser/ast.js";
 
 
 
+
+class BreakSignal {}
+class ContinueSignal {}
 
 class ReturnSignal {
     constructor(value) {
@@ -86,12 +91,27 @@ export default class Evaluator {
 
         if (stmt instanceof WhileStmt) {
             while (this.evalExpression(stmt.condition, env) !== 0) {
-                this.evalStatement(stmt.body, env);
+                try {
+                    this.evalStatement(stmt.body, env);
+                } catch (e) {
+                    if (e instanceof BreakSignal) break;
+                
+                    if (e instanceof ContinueSignal) continue;
+                
+                    throw e;
+                }
             }
             
             return;
         }
 
+        if (stmt instanceof BreakStmt) {
+            throw new BreakSignal();
+        }
+
+        if (stmt instanceof ContinueStmt) {
+            throw new ContinueSignal();
+        }
 
         if (stmt instanceof ReturnStmt) {
             const value = this.evalExpression(stmt.value, env);

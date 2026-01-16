@@ -73,6 +73,7 @@ export class BinaryExpr {
 ////////////////////////////////////////////////////////////////////////
 //loops
 
+//while 
 export class WhileStmt {
     constructor(condition, body) {
         this.condition = condition;
@@ -80,4 +81,7 @@ export class WhileStmt {
     }
 }
 
+// control block signals
+export class BreakStmt {}
+export class ContinueStmt {}
 

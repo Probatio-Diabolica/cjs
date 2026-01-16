@@ -30,6 +30,10 @@ export const TokenType = {
   EQ: "==",
   NE: "!=",
 
+  //control signals
+  BREAK: "BREAK",
+  CONTINUE: "CONTINUE",
+
   EOF: "EOF"
 };
 
