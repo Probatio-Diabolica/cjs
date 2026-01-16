@@ -97,3 +97,10 @@ export class FunctionCall {
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//std outs and ins
+export class OutStmt {
+    constructor(expr) {
+        this.expr = expr;
+    }
+}

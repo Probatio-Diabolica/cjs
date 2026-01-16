@@ -44,6 +44,9 @@ export const TokenType = {
   EQ: "==",
   NE: "!=",
 
+  //extras for now::
+  OUT:"OUT",
+
   EOF: "EOF"
 };
 

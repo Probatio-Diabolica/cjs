@@ -52,6 +52,7 @@ export default function lex(source) {
         while: TokenType.WHILE,
         for: TokenType.FOR,
         do: TokenType.DO,
+        out: TokenType.OUT,
       };
 
       add(keywords[text] ?? TokenType.IDENT, text);

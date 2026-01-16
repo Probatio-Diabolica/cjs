@@ -13,7 +13,8 @@ import {
     WhileStmt,
     BreakStmt,
     ContinueStmt,
-    FunctionCall
+    FunctionCall,
+    OutStmt
 } from "./ast.js";
 
 
@@ -98,6 +99,10 @@ export default class Parser {
 
         if (this.peek().type === TokenType.IF) {
             return this.parseIf();
+        }
+
+        if (this.peek().type === TokenType.OUT) {
+            return this.parseOut();
         }
 
         if ( this.peek().type === TokenType.IDENT && this.tokens[this.pos + 1]?.type === TokenType.ASSIGN) {
@@ -198,6 +203,18 @@ export default class Parser {
         stmts.push(whileStmt);
 
         return new Block(stmts);
+    }
+
+    parseOut() {
+        this.expect(TokenType.OUT);
+        this.expect(TokenType.LPAREN);
+     
+        const expr = this.parseExpression();
+     
+        this.expect(TokenType.RPAREN);
+        this.expect(TokenType.SEMI);
+     
+        return new OutStmt(expr);
     }
 
 

@@ -13,7 +13,8 @@ import {
     Assignment,  
     BreakStmt,
     ContinueStmt,
-    FunctionCall
+    FunctionCall,
+    OutStmt,
 } from "../parser/ast.js";
 
 
@@ -71,6 +72,13 @@ export default class Evaluator {
 
 
     evalStatement(stmt, env) {
+        if (stmt instanceof OutStmt) {
+            const value = this.evalExpression(stmt.expr, env);
+            console.log(value);
+            return;
+        }
+
+
         if (stmt instanceof Block) {
             this.evalBlock(stmt, env);
             return;
