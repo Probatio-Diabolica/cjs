@@ -144,6 +144,8 @@ export default class Evaluator {
                     return left * right;
                 case "/":
                     return Math.trunc(left / right);
+                case "%":
+                    return left % right;
 
                 case "<":
                     return left < right ? 1 : 0;

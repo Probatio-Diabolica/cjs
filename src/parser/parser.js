@@ -202,8 +202,9 @@ export default class Parser {
         let expr = this.parsePrimary();
 
         while (
-            this.peek().type === TokenType.STAR ||
-            this.peek().type === TokenType.SLASH
+            this.peek().type === TokenType.STAR  ||
+            this.peek().type === TokenType.SLASH ||
+            this.peek().type === TokenType.PERCENT
         ) {
             const op = this.advance().type;
             const right = this.parsePrimary();
