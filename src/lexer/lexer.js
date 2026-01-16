@@ -50,7 +50,8 @@ export default function lex(source) {
         break: TokenType.BREAK,
         continue: TokenType.CONTINUE,
         while: TokenType.WHILE,
-        for: TokenType.FOR
+        for: TokenType.FOR,
+        do: TokenType.DO,
       };
 
       add(keywords[text] ?? TokenType.IDENT, text);

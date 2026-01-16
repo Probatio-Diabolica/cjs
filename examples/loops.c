@@ -13,5 +13,12 @@ int main() {
     {
         sum = sum + i;
     }
+
+    sum = 0;
+    do {
+        sum = sum + 10;
+        x = x + 1;
+    }while (x <= 10);
+
     return sum;
 }

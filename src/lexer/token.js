@@ -1,4 +1,5 @@
 export const TokenType = {
+  //keywords
   INT: "INT",
   RETURN: "RETURN",
   IF: "IF",
@@ -7,36 +8,41 @@ export const TokenType = {
   //loops
   WHILE: "WHILE",
   FOR: "FOR",
-
+  DO:  "DO",
   
+  //control signals
+  BREAK: "BREAK",
+  CONTINUE: "CONTINUE",
+
+  //identifiers & literals 
   IDENT: "IDENT",
   NUMBER: "NUMBER",
 
+  //assignment op
+  ASSIGN: "=",
+
+  //arithmetic ops
   PLUS: "+",
   MINUS: "-",
   STAR: "*",
   SLASH: "/",
   PERCENT: "%",
 
+  //delimiters
   LPAREN: "(",
   RPAREN: ")",
   LBRACE: "{",
   RBRACE: "}",
   SEMI: ";",
   COMMA: ",",
-  ASSIGN: "=",
 
-  //comparators
+  //ccomparison ops  
   LT: "<",
   GT: ">",
   LE: "<=",
   GE: ">=",
   EQ: "==",
   NE: "!=",
-
-  //control signals
-  BREAK: "BREAK",
-  CONTINUE: "CONTINUE",
 
   EOF: "EOF"
 };

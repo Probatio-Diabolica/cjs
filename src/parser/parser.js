@@ -112,6 +112,9 @@ export default class Parser {
             return this.parseFor();
         }
 
+        if (this.peek().type === TokenType.DO) {
+            return this.parseDoWhile();
+        }
 
         if (this.peek().type === TokenType.WHILE) {
             return this.parseWhile();
@@ -208,6 +211,35 @@ export default class Parser {
         const body = this.parseStatement();
 
         return new WhileStmt(condition, body);
+    }
+
+    parseDoWhile() {
+        this.expect(TokenType.DO);
+
+        const body = this.parseStatement();
+
+        this.expect(TokenType.WHILE);
+        this.expect(TokenType.LPAREN);
+        const condition = this.parseExpression();
+        this.expect(TokenType.RPAREN);
+        this.expect(TokenType.SEMI);
+
+        //desugar:
+        //{ body; while (cond) { body; } }
+
+        const firstRun = body instanceof Block
+            ? body
+            : new Block([body]);
+
+        const loopBodyStmts = [...firstRun.statements];
+        const whileBody = new Block(loopBodyStmts);
+
+        const whileStmt = new WhileStmt(condition, whileBody);
+
+        return new Block([
+            firstRun,
+            whileStmt
+        ]);
     }
 
 
