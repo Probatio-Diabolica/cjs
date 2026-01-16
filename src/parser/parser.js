@@ -108,6 +108,11 @@ export default class Parser {
             return this.parseReturn();
         }
 
+        if (this.peek().type === TokenType.FOR) {
+            return this.parseFor();
+        }
+
+
         if (this.peek().type === TokenType.WHILE) {
             return this.parseWhile();
         }
@@ -126,6 +131,72 @@ export default class Parser {
 
         throw new Error("Unknown statement");
     }
+
+    parseFor() {
+        this.expect(TokenType.FOR);
+        this.expect(TokenType.LPAREN);
+
+        // init
+        let init = null;
+
+        if (this.peek().type !== TokenType.SEMI) {
+            if (this.peek().type === TokenType.INT) {
+                init = this.parseVarDecl();
+            } else {
+                init = this.parseAssignment();
+            }
+        } else {
+            this.expect(TokenType.SEMI);
+        }
+
+        // condition
+        let condition = null;
+
+        if (this.peek().type !== TokenType.SEMI) {
+            condition = this.parseExpression();
+        }
+
+        this.expect(TokenType.SEMI);
+
+        // step
+        let step = null;
+        if (this.peek().type !== TokenType.RPAREN) {
+            step = this.parseAssignmentExpr();
+        }
+
+        this.expect(TokenType.RPAREN);
+
+        const body = this.parseStatement();
+
+        // desugar:
+        // { init; while (condition) { body; step; } }
+
+        const stmts = [];
+
+        if (init) stmts.push(init);
+
+        const whileBodyStmts = [];
+
+        if (body instanceof Block) {
+            whileBodyStmts.push(...body.statements);
+        } else {
+            whileBodyStmts.push(body);
+        }
+
+        if (step) whileBodyStmts.push(step);
+
+        const whileBody = new Block(whileBodyStmts);
+
+        const whileStmt = new WhileStmt(
+            condition ?? new NumberLiteral(1),
+            whileBody
+        );
+
+        stmts.push(whileStmt);
+
+        return new Block(stmts);
+    }
+
 
     parseWhile() {
         this.expect(TokenType.WHILE);
@@ -241,6 +312,13 @@ export default class Parser {
         const value = this.parseExpression();
         this.expect(TokenType.SEMI);
         
+        return new Assignment(name, value);
+    }
+
+    parseAssignmentExpr() {
+        const name = this.expect(TokenType.IDENT).value;
+        this.expect(TokenType.ASSIGN);
+        const value = this.parseExpression();
         return new Assignment(name, value);
     }
 

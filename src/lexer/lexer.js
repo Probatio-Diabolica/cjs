@@ -47,9 +47,10 @@ export default function lex(source) {
         return: TokenType.RETURN,
         if: TokenType.IF,
         else: TokenType.ELSE,
-        while: TokenType.WHILE,
         break: TokenType.BREAK,
-        continue: TokenType.CONTINUE
+        continue: TokenType.CONTINUE,
+        while: TokenType.WHILE,
+        for: TokenType.FOR
       };
 
       add(keywords[text] ?? TokenType.IDENT, text);

@@ -3,8 +3,12 @@ export const TokenType = {
   RETURN: "RETURN",
   IF: "IF",
   ELSE: "ELSE",
-  WHILE: "WHILE",
 
+  //loops
+  WHILE: "WHILE",
+  FOR: "FOR",
+
+  
   IDENT: "IDENT",
   NUMBER: "NUMBER",
 
