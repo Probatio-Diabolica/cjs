@@ -16,6 +16,9 @@ import {
     ContinueStmt,
     FunctionCall,
     OutStmt,
+    ArrayAccess,
+    ArrayAssign,
+    ArrayDecl,
 } from "../parser/ast.js";
 
 
@@ -79,6 +82,19 @@ export default class Evaluator {
             return;
         }
 
+        if (stmt instanceof ArrayDecl) {
+            const size = this.evalExpression(stmt.size, env);
+            env.define(stmt.name, new Array(size).fill(0));
+            return;
+        }
+
+        if (stmt instanceof ArrayAssign) {
+            const arr = env.get(stmt.name); 
+            const idx = this.evalExpression(stmt.index, env);
+            const val = this.evalExpression(stmt.value, env);
+            arr[idx] = val;
+            return;
+        }
 
         if (stmt instanceof Block) {
             this.evalBlock(stmt, env);
@@ -146,7 +162,13 @@ export default class Evaluator {
         if (expr instanceof NumberLiteral) {
             return expr.value;
         }
-        
+
+        if (expr instanceof ArrayAccess) {
+            const arr = env.get(expr.name);
+            const idx = this.evalExpression(expr.index, env);
+            return arr[idx];
+        }
+
         if (expr instanceof CharLiteral) {
             return expr.value;
         }

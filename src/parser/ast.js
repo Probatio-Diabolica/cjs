@@ -69,6 +69,32 @@ export class CharLiteral {
     }
 }
 
+//arrays
+export class ArrayDecl {
+    constructor(name, size) {
+        this.name = name;
+        this.size = size;
+    }
+}
+
+export class ArrayAccess {
+    constructor(name, index) {
+        this.name = name;
+        this.index = index;
+    }
+}
+
+export class ArrayAssign {
+    constructor(name, index, value) {
+        this.name = name;
+        this.index = index;
+        this.value = value;
+    }
+}
+
+
+
+
 ///////////////////////////////////////////////////////////////////////
 // arithmetics
 

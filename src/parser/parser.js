@@ -16,7 +16,10 @@ import {
     BreakStmt,
     ContinueStmt,
     FunctionCall,
-    OutStmt
+    OutStmt,
+    ArrayAccess,
+    ArrayAssign,
+    ArrayDecl,
 } from "./ast.js";
 
 
@@ -107,6 +110,25 @@ export default class Parser {
 
         if (this.peek().type === TokenType.OUT) {
             return this.parseOut();
+        }
+
+        if (
+            this.peek().type === TokenType.IDENT &&
+            this.tokens[this.pos + 1]?.type === TokenType.LBRACKET
+        ) {
+            const name = this.advance().value;
+            
+            this.expect(TokenType.LBRACKET);
+            const index = this.parseExpression();
+
+            this.expect(TokenType.RBRACKET);
+            this.expect(TokenType.ASSIGN);
+            
+            const value = this.parseExpression();
+            
+            this.expect(TokenType.SEMI);
+
+            return new ArrayAssign(name, index, value);
         }
 
         if ( this.peek().type === TokenType.IDENT && this.tokens[this.pos + 1]?.type === TokenType.ASSIGN) {
@@ -285,12 +307,21 @@ export default class Parser {
 
     parseVarDecl() {
         const type = this.advance(); // INT or CHAR
+        const name = this.expect(TokenType.IDENT).value;
+        
+        if (this.peek().type === TokenType.LBRACKET) {
+            this.advance(); // [
+            const size = this.parseExpression();
+            this.expect(TokenType.RBRACKET);
+            this.expect(TokenType.SEMI);
+            return new ArrayDecl(name, size);
+        }
 
         if (type.type !== TokenType.INT && type.type !== TokenType.CHAR) {
             throw new Error("Expected type");
         }
 
-        const name = this.expect(TokenType.IDENT).value;
+        
 
 
 
@@ -390,6 +421,17 @@ export default class Parser {
         if (this.peek().type === TokenType.CHAR_LITERAL) {
             return new CharLiteral(this.advance().value);
         }
+
+        if (this.peek().type === TokenType.IDENT &&
+            this.tokens[this.pos + 1]?.type === TokenType.LBRACKET) 
+        {
+            const name = this.advance().value;
+            this.expect(TokenType.LBRACKET);
+            const index = this.parseExpression();
+            this.expect(TokenType.RBRACKET);
+            return new ArrayAccess(name, index);
+        }
+
 
         if (this.peek().type === TokenType.IDENT) {
             const name = this.advance().value;

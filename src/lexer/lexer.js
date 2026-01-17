@@ -121,6 +121,8 @@ export default function lex(source) {
       "%": TokenType.PERCENT,
       "(": TokenType.LPAREN,
       ")": TokenType.RPAREN,
+      "[": TokenType.LBRACKET, 
+      "]": TokenType.RBRACKET,
       "{": TokenType.LBRACE,
       "}": TokenType.RBRACE,
       ";": TokenType.SEMI,
