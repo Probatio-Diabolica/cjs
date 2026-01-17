@@ -313,8 +313,31 @@ export default class Parser {
             this.advance(); // [
             const size = this.parseExpression();
             this.expect(TokenType.RBRACKET);
+
+            let initValues = null;
+
+            if (this.peek().type === TokenType.ASSIGN) {
+                this.advance(); // =
+                this.expect(TokenType.LBRACE);
+
+                initValues = [];
+
+                if (this.peek().type !== TokenType.RBRACE) {
+                    do {
+                        initValues.push(this.parseExpression());
+                    } while (
+                        this.peek().type === TokenType.COMMA &&
+                        this.advance()
+                    );
+                }
+
+                this.expect(TokenType.RBRACE);
+            }
+            
+            
             this.expect(TokenType.SEMI);
-            return new ArrayDecl(name, size);
+
+            return new ArrayDecl(name, size , initValues);
         }
 
         if (type.type !== TokenType.INT && type.type !== TokenType.CHAR) {

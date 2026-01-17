@@ -1,11 +1,9 @@
 int main() {
-    int a[5];
+    int a[5] = {21,432,54,64, 80};
 
-    for(int i =0 ; i < 5;i = i + 1)
+    for(int x =0 ; x < 5;x = x + 1)
     {
-        a[i] = i*200 + 10;
-        out(a[i]);
+        out(a[x]);
     }
 
-    
 }

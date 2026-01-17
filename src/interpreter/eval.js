@@ -84,7 +84,28 @@ export default class Evaluator {
 
         if (stmt instanceof ArrayDecl) {
             const size = this.evalExpression(stmt.size, env);
-            env.define(stmt.name, new Array(size).fill(0));
+            const arr = new Array(size).fill(0);
+
+            //if initValues are than the allocated size throw an error
+            if(
+                stmt.initValues && 
+                size < stmt.initValues.length
+            ){
+                throw new Error(`Array initializer has ${stmt.initValues.length} elements, but array size is ${size}`);
+            }
+
+
+            //filling it if init vals exists. the rule is if initValues is given then fill the  
+            //array with it,
+            //also if initValues.size() < size, then fill the array with initValues leave the rest 
+            //to be zeros 
+            if (stmt.initValues) {
+                for (let i = 0; i < stmt.initValues.length && i < size; i++) {
+                    arr[i] = this.evalExpression(stmt.initValues[i], env);
+                }
+            }
+
+            env.define(stmt.name, arr);
             return;
         }
 
