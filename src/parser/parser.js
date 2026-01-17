@@ -1,4 +1,5 @@
 import { TokenType } from "../lexer/token.js";
+
 import {
     Program,
     FunctionDecl,
@@ -6,6 +7,7 @@ import {
     IfStmt,
     ReturnStmt,
     NumberLiteral,
+    CharLiteral,
     BinaryExpr,
     VarDecl,
     Identifier,
@@ -93,9 +95,11 @@ export default class Parser {
             return this.parseBlock();
         }
 
-        if (this.peek().type === TokenType.INT) {
+        if (this.peek().type === TokenType.INT ||
+            this.peek().type === TokenType.CHAR) {
             return this.parseVarDecl();
         }
+
 
         if (this.peek().type === TokenType.IF) {
             return this.parseIf();
@@ -280,8 +284,15 @@ export default class Parser {
     }
 
     parseVarDecl() {
-        this.expect(TokenType.INT);
+        const type = this.advance(); // INT or CHAR
+
+        if (type.type !== TokenType.INT && type.type !== TokenType.CHAR) {
+            throw new Error("Expected type");
+        }
+
         const name = this.expect(TokenType.IDENT).value;
+
+
 
         let init = null;
         if (this.peek().type === TokenType.ASSIGN) {
@@ -290,7 +301,7 @@ export default class Parser {
         }
 
         this.expect(TokenType.SEMI);
-        return new VarDecl(name, init);
+        return new VarDecl(type.type, name, init);
     }
 
 
@@ -374,6 +385,10 @@ export default class Parser {
     parsePrimary() {
         if (this.peek().type === TokenType.NUMBER) {
             return new NumberLiteral(Number(this.advance().value));
+        }
+
+        if (this.peek().type === TokenType.CHAR_LITERAL) {
+            return new CharLiteral(this.advance().value);
         }
 
         if (this.peek().type === TokenType.IDENT) {

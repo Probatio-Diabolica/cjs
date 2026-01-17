@@ -7,6 +7,7 @@ import {
     IfStmt,
     ReturnStmt,
     NumberLiteral,
+    CharLiteral,
     BinaryExpr,
     VarDecl,
     Identifier,
@@ -143,6 +144,10 @@ export default class Evaluator {
 
     evalExpression(expr, env) {
         if (expr instanceof NumberLiteral) {
+            return expr.value;
+        }
+        
+        if (expr instanceof CharLiteral) {
             return expr.value;
         }
 

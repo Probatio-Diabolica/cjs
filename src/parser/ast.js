@@ -32,14 +32,12 @@ export class ReturnStmt {
     }
 }
 
-export class NumberLiteral {
-    constructor(value) {
-        this.value = value;
-    }
-}
+
+
 
 export class VarDecl {
-    constructor(name, init) {
+    constructor(type, name, init) {
+        this.type = type;
         this.name = name;
         this.init = init;
     }
@@ -58,6 +56,18 @@ export class Assignment {
     }
 }
 
+////////////////////////////////////////////
+export class NumberLiteral {
+    constructor(value) {
+        this.value = value;
+    }
+}
+
+export class CharLiteral {
+    constructor(value) {
+        this.value = value; // numeric (ASCII)
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////
 // arithmetics

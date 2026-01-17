@@ -1,6 +1,7 @@
 export const TokenType = {
   //keywords
   INT: "INT",
+  CHAR:"CHAR",
   RETURN: "RETURN",
   IF: "IF",
   ELSE: "ELSE",
@@ -17,6 +18,7 @@ export const TokenType = {
   //identifiers & literals 
   IDENT: "IDENT",
   NUMBER: "NUMBER",
+  CHAR_LITERAL: "CHAR_LITERAL",
 
   //assignment op
   ASSIGN: "=",

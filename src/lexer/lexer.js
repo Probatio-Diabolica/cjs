@@ -44,6 +44,7 @@ export default function lex(source) {
 
       const keywords = {
         int: TokenType.INT,
+        char: TokenType.CHAR,
         return: TokenType.RETURN,
         if: TokenType.IF,
         else: TokenType.ELSE,
@@ -59,6 +60,38 @@ export default function lex(source) {
       col += i - start;
       continue;
     }
+
+    // char literal
+    if (ch === "'") {
+      const startCol = col;
+
+      i++;
+      col++;
+
+      if (i >= source.length || source[i] === "\n") {
+        throw new Error(`Unterminated char literal at ${line}:${startCol}`);
+      }
+
+      const charValue = source[i];
+
+      if (charValue === "'") {
+        throw new Error(`Empty char literal at ${line}:${startCol}`);
+      }
+
+      i++;
+      col++;
+
+      if (source[i] !== "'") {
+        throw new Error(`Multi-character char literal at ${line}:${startCol}`);
+      }
+
+      i++;
+      col++;
+
+      add(TokenType.CHAR_LITERAL, charValue.charCodeAt(0));
+      continue;
+    }
+    
 
     // two char operators
     const twoChar = source.slice(i, i + 2);
