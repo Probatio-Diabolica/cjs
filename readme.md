@@ -1,7 +1,6 @@
 # cjs
 
-A small C interpreter written in JavaScript, supporting a strict subset of C focused on control flow and expressions.
-
+A lightweight C interpreter implemented in JavaScript, designed to execute a deliberately scoped subset of C with an emphasis on core runtime semantics
 
 ## Installation
 
@@ -33,5 +32,6 @@ cjs <file.c> --ub
 ```
 
 
-> This project is under active development and currently supports a limited subset of C.
+> This project is under active development and intentionally supports only a subset of C.
+> Features are added selectively, with correctness and semantic clarity taking priority over completeness.
 
