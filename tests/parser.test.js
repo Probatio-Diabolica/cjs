@@ -1,9 +1,6 @@
 import lex from "../src/lexer/lexer.js";
 import Parser from "../src/parser/parser.js";
-
-function assert(cond, msg) {
-  if (!cond) throw new Error(msg);
-}
+import { assert } from "./includes.js";
 
 const source = `
 int main() {

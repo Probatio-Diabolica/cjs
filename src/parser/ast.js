@@ -72,6 +72,7 @@ export class CharLiteral {
 //Implementing arrays is a real pain... 
 // not only you have to implement an empty array but also you have to think for the cases 
 // if init list has elements less than or more than the size. it gave the most bugs so far
+
 //arrays
 export class ArrayDecl {
     constructor(name, size,initValues = null) {

@@ -69,8 +69,12 @@ export default class Evaluator {
 
 
     evalBlock(block, env) {
+        //crreating a new environment for a new scope
+        const blockEnv = new Environment(env);
+
+        //then this will be evaluating the statements wrt the new scope 
         for (const stmt of block.statements) {
-            this.evalStatement(stmt, env);
+            this.evalStatement(stmt, blockEnv);
         }
     }
 

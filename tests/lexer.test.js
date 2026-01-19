@@ -1,9 +1,6 @@
 import lex from "../src/lexer/lexer.js";
 import { TokenType } from "../src/lexer/token.js";
-
-function assert(cond, msg) {
-  if (!cond) throw new Error(msg);
-}
+import {assert} from "./includes.js";
 
 const source = `
 int main() {
