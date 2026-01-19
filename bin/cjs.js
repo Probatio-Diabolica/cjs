@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import process from "process";
 import run from "../src/index.js";
+import {CjsError} from "../src/errors.js";
 
 function usage() {
   console.error("usage: cjs <file.c> [--ub]");
@@ -40,7 +41,15 @@ const source = fs.readFileSync(filePath, "utf8");
 try {
   run(source, { ub: ubMode });
 } catch (err) {
-  console.error(err.message);
+  if (err instanceof CjsError) {
+    console.error(err.toString());
+    process.exit(1);
+  }
+
+  // unexpected internal error
+  console.error("internal error:");
+  console.error(err.stack || err);
   process.exit(1);
 }
+
 

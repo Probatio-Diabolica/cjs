@@ -10,5 +10,8 @@ export default function run(source) {
   const evaluator = new Evaluator();
   const result = evaluator.evalProgram(ast);
 
-  console.log("Program exited with:", result);
+  if (result !== undefined) {
+    console.log("Program exited with:", result);
+  }
+
 }

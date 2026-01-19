@@ -1,4 +1,5 @@
 import { TokenType } from "../lexer/token.js";
+import { SyntaxError } from "../errors.js";
 
 import {
     Program,
@@ -43,7 +44,10 @@ export default class Parser {
     expect(type) {
         const t = this.advance();
         if (t.type !== type) {
-        throw new Error(`Expected ${type}, got ${t.type}`);
+            throw new SyntaxError(
+                `Expected '${type}', got '${t.type}'`,
+                t
+            );
         }
         return t;
     }
@@ -163,7 +167,10 @@ export default class Parser {
             return new ContinueStmt();
         }
 
-        throw new Error("Unknown statement");
+        throw new SyntaxError(
+            "Unknown statement",
+            this.peek()
+        );
     }
 
     parseFor() {
@@ -234,12 +241,12 @@ export default class Parser {
     parseOut() {
         this.expect(TokenType.OUT);
         this.expect(TokenType.LPAREN);
-     
+    
         const expr = this.parseExpression();
-     
+    
         this.expect(TokenType.RPAREN);
         this.expect(TokenType.SEMI);
-     
+    
         return new OutStmt(expr);
     }
 
@@ -341,7 +348,10 @@ export default class Parser {
         }
 
         if (type.type !== TokenType.INT && type.type !== TokenType.CHAR) {
-            throw new Error("Expected type");
+            throw new SyntaxError(
+                "Expected type specifier",
+                type
+            );
         }
 
         
@@ -486,8 +496,16 @@ export default class Parser {
             return expr;
         }
 
-        throw new Error("Expected expression");
+        throw new SyntaxError(
+            "Expected expression",
+            this.peek()
+        );
     }
+
+    peekSafe() {
+        return this.tokens[this.pos] ?? this.tokens[this.tokens.length - 1];
+    }
+
 
 
 }

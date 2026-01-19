@@ -7,6 +7,6 @@ int main() {
 
     for(int x =0 ; x < 5;x = x + 1) out(b[x]);
     
-    for(int x =0 ; x < 5;x = x + 1) out(c[x]);
+    for(int x =0 ; x < 5;x = x + 1) out(c[x])
 
 }
