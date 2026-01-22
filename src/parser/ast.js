@@ -65,7 +65,7 @@ export class NumberLiteral {
 
 export class CharLiteral {
     constructor(value) {
-        this.value = value; // numeric (ASCII)
+        this.value = typeof value === "number" ? value : value.charCodeAt(0);
     }
 }
 

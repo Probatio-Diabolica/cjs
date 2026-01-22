@@ -91,7 +91,41 @@ export default function lex(source) {
       add(TokenType.CHAR_LITERAL, charValue.charCodeAt(0));
       continue;
     }
-    
+
+    // string literal
+    if (ch === '"') {
+      const startLine = line;
+      const startCol = col;
+
+      i++;     // consume opening quote
+      col++;
+
+      let value = "";
+
+      while (i < source.length && source[i] !== '"') {
+        if (source[i] === "\n") {
+          throw new Error(`Unterminated string literal at ${startLine}:${startCol}`);
+        }
+
+        value += source[i];
+        i++;
+        col++;
+      }
+
+      if (i >= source.length) {
+        throw new Error(`Unterminated string literal at ${startLine}:${startCol}`);
+      }
+
+      // consume closing quote
+      i++;
+      col++;
+      
+      // add(TokenType.STRING_LITERAL, value);
+
+      tokens.push(  new Token(TokenType.STRING_LITERAL, value, startLine, startCol));
+      continue;
+    }
+
 
     // two char operators
     const twoChar = source.slice(i, i + 2);

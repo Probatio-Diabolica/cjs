@@ -1,4 +1,5 @@
 import Environment from "./environment.js";
+import {SemanticError} from "../errors.js"
 import {
     Program,
     FunctionDecl,
@@ -20,6 +21,7 @@ import {
     ArrayAssign,
     ArrayDecl,
 } from "../parser/ast.js";
+import { TokenType } from "../lexer/token.js";
 
 
 
@@ -47,7 +49,7 @@ export default class Evaluator {
 
         const main = this.functions.get("main");
         
-        if (!main) throw new Error("No main function");
+        if (!main) throw new SemanticError("No main function", null);
         
         return this.evalFunction(main);
     }
@@ -59,7 +61,7 @@ export default class Evaluator {
             this.evalBlock(fn.body, env);
         } catch (e) {
             if (e instanceof ReturnSignal) {
-            return e.value;
+                return e.value;
             }
             throw e;
         }
@@ -87,17 +89,35 @@ export default class Evaluator {
         }
 
         if (stmt instanceof ArrayDecl) {
-            const size = this.evalExpression(stmt.size, env);
-            const arr = new Array(size).fill(0);
+            // const size = this.evalExpression(stmt.size, env);
+            // 
+            let size = 0;
+
+            if(stmt.size){
+                size = this.evalExpression(stmt.size, env);
+            }else if(stmt.initValues){
+                size = size.initValues.length;
+            }else{
+                throw new SemanticError(
+                    "Array size required",
+                    stmt.token
+                );
+            }
+
+            if(size <= 0 ) throw new SemanticError("Array size must be positive", stmt.token);
 
             //if initValues are than the allocated size throw an error
             if(
                 stmt.initValues && 
                 size < stmt.initValues.length
             ){
-                throw new Error(`Array initializer has ${stmt.initValues.length} elements, but array size is ${size}`);
+                    throw new SemanticError(
+                        "Initializer too long for array",
+                        stmt.token
+                    );
             }
 
+            const arr = new Array(size).fill(0);
 
             //filling it if init vals exists. the rule is if initValues is given then fill the  
             //array with it,
@@ -179,7 +199,7 @@ export default class Evaluator {
             throw new ReturnSignal(value);
         }
 
-        throw new Error("Unknown statement type");
+        throw new Error(`Internal error: unhandled statement type ${stmt.constructor.name}`);
     }
 
 
@@ -191,6 +211,13 @@ export default class Evaluator {
         if (expr instanceof ArrayAccess) {
             const arr = env.get(expr.name);
             const idx = this.evalExpression(expr.index, env);
+            if (idx < 0 || idx >= arr.length) {
+                throw new SemanticError(
+                    "Array index out of bounds",
+                    expr.token
+                );
+            }
+
             return arr[idx];
         }
 
@@ -206,9 +233,19 @@ export default class Evaluator {
             
             const fn = this.functions.get(expr.name);
 
-            if (!fn) throw new Error(`Undefined function '${expr.name}'`); 
+            if (!fn) {
+                throw new SemanticError(
+                    `Undefined function '${expr.name}'`,
+                    expr.token
+                );
+            }
 
-            if (fn.params.length !== expr.args.length) throw new Error(`Argument count mismatch in call to '${expr.name}'`);
+            if (fn.params.length !== expr.args.length) {
+                throw new SemanticError(
+                    `Argument count mismatch in call to '${expr.name}'`,
+                    expr.token
+                );
+            }
 
             const callEnv = new Environment();
 
@@ -232,35 +269,36 @@ export default class Evaluator {
         if (expr instanceof BinaryExpr) {
             const left = this.evalExpression(expr.left, env);
             const right = this.evalExpression(expr.right, env);
-
             switch (expr.operator) {
-                case "+":
+                case TokenType.PLUS:
                     return left + right;
-                case "-":
+                case TokenType.MINUS:
                     return left - right;
-                case "*":
+                case TokenType.STAR:
                     return left * right;
-                case "/":
+                case TokenType.SLASH:
+                        // Division by zero is undefined behavior in C.
+                        // We intentionally allow it and defer to host semantics.
                     return Math.trunc(left / right);
-                case "%":
+                case TokenType.PERCENT:
                     return left % right;
 
-                case "<":
+                case TokenType.LT:
                     return left < right ? 1 : 0;
-                case ">":
+                case TokenType.GT:
                     return left > right ? 1 : 0;
-                case "<=":
+                case TokenType.LE:
                     return left <= right ? 1 : 0;
-                case ">=":
+                case TokenType.GE:
                     return left >= right ? 1 : 0;
-                case "==":
+                case TokenType.EQ:
                     return left === right ? 1 : 0;
-                case "!=":
+                case TokenType.NE:
                     return left !== right ? 1 : 0;
             }
         }
 
-        throw new Error("Unknown expression");
+        throw new Error(`Internal error: unhandled expression type ${expr.constructor.name}`);
     }
 
 

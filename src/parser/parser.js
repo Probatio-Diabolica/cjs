@@ -312,53 +312,152 @@ export default class Parser {
         return new IfStmt(cond, thenBranch, elseBranch);
     }
 
+    // parseVarDecl() {
+    //     const type = this.advance(); // INT or CHAR
+    //     const name = this.expect(TokenType.IDENT).value;
+        
+    //     if (this.peek().type === TokenType.LBRACKET) {
+    //         this.advance(); // [
+
+    //         //string literal
+    //         if (this.peek().type === TokenType.STRING_LITERAL) {
+    //             const str = this.advance().value;
+    //             this.expect(TokenType.SEMI);
+
+    //             return new ArrayDecl(
+    //                 name,
+    //                 size,
+    //                 [...str].map(c => new CharLiteral(c)).concat(
+    //                     new CharLiteral('\0')
+    //                 )
+    //             );
+    //         }
+
+    //         const size = this.parseExpression();
+    //         this.expect(TokenType.RBRACKET);
+
+    //         let initValues = null;
+
+    //         if (this.peek().type === TokenType.ASSIGN) {
+    //             this.advance(); // =
+    //             this.expect(TokenType.LBRACE);
+
+    //             initValues = [];
+
+    //             if (this.peek().type !== TokenType.RBRACE) {
+    //                 do {
+    //                     initValues.push(this.parseExpression());
+    //                 } while (
+    //                     this.peek().type === TokenType.COMMA &&
+    //                     this.advance()
+    //                 );
+    //             }
+
+    //             this.expect(TokenType.RBRACE);
+    //         }
+            
+            
+    //         this.expect(TokenType.SEMI);
+
+    //         return new ArrayDecl(name, size , initValues);
+    //     }
+
+    //     if (type.type !== TokenType.INT && type.type !== TokenType.CHAR) {
+    //         throw new SyntaxError(
+    //             "Expected type specifier",
+    //             type
+    //         );
+    //     }
+
+        
+
+
+
+    //     let init = null;
+    //     if (this.peek().type === TokenType.ASSIGN) {
+    //         this.advance();
+    //         init = this.parseExpression();
+    //     }
+
+    //     this.expect(TokenType.SEMI);
+    //     return new VarDecl(type.type, name, init);
+    // }
+
     parseVarDecl() {
         const type = this.advance(); // INT or CHAR
-        const name = this.expect(TokenType.IDENT).value;
-        
+        const nameTok = this.expect(TokenType.IDENT);
+        const name = nameTok.value;
+
+        // ARRAY DECLARATION
         if (this.peek().type === TokenType.LBRACKET) {
-            this.advance(); // [
-            const size = this.parseExpression();
+            this.advance(); // '['
+
+            let size = null;
+
+            // optional size
+            if (this.peek().type !== TokenType.RBRACKET) {
+                size = this.parseExpression();
+            }
+
             this.expect(TokenType.RBRACKET);
 
-            let initValues = null;
-
-            if (this.peek().type === TokenType.ASSIGN) {
-                this.advance(); // =
-                this.expect(TokenType.LBRACE);
-
-                initValues = [];
-
-                if (this.peek().type !== TokenType.RBRACE) {
-                    do {
-                        initValues.push(this.parseExpression());
-                    } while (
-                        this.peek().type === TokenType.COMMA &&
-                        this.advance()
+            // initializer is REQUIRED if size is omitted
+            if (this.peek().type !== TokenType.ASSIGN) {
+                if (size === null) {
+                    throw new SyntaxError(
+                        "Array with unspecified size requires initializer",
+                        this.peek()
                     );
                 }
 
-                this.expect(TokenType.RBRACE);
+                this.expect(TokenType.SEMI);
+                return new ArrayDecl(name, size, null);
             }
-            
-            
+
+            this.advance(); // '='
+
+            let initValues = null;
+
+            // STRING LITERAL → char[]
+            if (this.peek().type === TokenType.STRING_LITERAL) {
+                const str = this.advance().value;
+
+                if (type.type !== TokenType.CHAR) {
+                    throw new SyntaxError(
+                        "String literal can only initialize char arrays",
+                        this.peek()
+                    );
+                }
+
+                initValues = [...str].map(c => new CharLiteral(c));
+                initValues.push(new CharLiteral('\0'));
+
+                this.expect(TokenType.SEMI);
+                return new ArrayDecl(name, size, initValues);
+            }
+
+            // { ... } initializer
+            this.expect(TokenType.LBRACE);
+            initValues = [];
+
+            if (this.peek().type !== TokenType.RBRACE) {
+                do {
+                    initValues.push(this.parseExpression());
+                } while (
+                    this.peek().type === TokenType.COMMA &&
+                    this.advance()
+                );
+            }
+
+            this.expect(TokenType.RBRACE);
             this.expect(TokenType.SEMI);
 
-            return new ArrayDecl(name, size , initValues);
+            return new ArrayDecl(name, size, initValues);
         }
 
-        if (type.type !== TokenType.INT && type.type !== TokenType.CHAR) {
-            throw new SyntaxError(
-                "Expected type specifier",
-                type
-            );
-        }
-
-        
-
-
-
+        // SCALAR DECLARATION
         let init = null;
+
         if (this.peek().type === TokenType.ASSIGN) {
             this.advance();
             init = this.parseExpression();
@@ -505,10 +604,4 @@ export default class Parser {
     peekSafe() {
         return this.tokens[this.pos] ?? this.tokens[this.tokens.length - 1];
     }
-
-
-
 }
-
-
-

@@ -19,6 +19,7 @@ export const TokenType = {
   IDENT: "IDENT",
   NUMBER: "NUMBER",
   CHAR_LITERAL: "CHAR_LITERAL",
+  STRING_LITERAL:"STRING_LITERAL",
 
   //assignment op
   ASSIGN: "=",
@@ -47,6 +48,12 @@ export const TokenType = {
   GE: ">=",
   EQ: "==",
   NE: "!=",
+
+  //note: unimplemented
+  //logical
+  AND:"&&",
+  OR:"||",
+  NOT:"!",
 
   //extras for now::
   OUT:"OUT",
