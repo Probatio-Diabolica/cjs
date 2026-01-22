@@ -1,148 +1,164 @@
 import { Token, TokenType } from "./token.js";
 
-export default function lex(source) {
-  const tokens = [];
-  let i = 0;
-  let line = 1;
-  let col = 1;
+const KEYWORDS = {
+  int: TokenType.INT,
+  char: TokenType.CHAR,
+  return: TokenType.RETURN,
+  if: TokenType.IF,
+  else: TokenType.ELSE,
+  break: TokenType.BREAK,
+  continue: TokenType.CONTINUE,
+  while: TokenType.WHILE,
+  for: TokenType.FOR,
+  do: TokenType.DO,
+  out: TokenType.OUT,
+};
 
-  const add = (type, value = null) => {
-    tokens.push(new Token(type, value, line, col));
+const isDigit = ch => /[0-9]/.test(ch);
+const isIdentStart = ch => /[a-zA-Z_]/.test(ch);
+const isIdent = ch => /[a-zA-Z0-9_]/.test(ch);
+
+function scanNumber(state) {
+    const startCol = state.col;
+    const start = state.i;
+
+    while (isDigit(state.source[state.i])) state.i++;
+
+    const value = state.source.slice(start, state.i);
+    state.tokens.push(new Token(TokenType.NUMBER, value, state.line, startCol));
+    state.col += state.i - start;
+}
+
+function scanIdentifier(state) {
+    const startCol = state.col;
+    const start = state.i;
+
+    while (isIdent(state.source[state.i])) state.i++;
+
+    const text = state.source.slice(start, state.i);
+    const type = KEYWORDS[text] ?? TokenType.IDENT;
+
+    state.tokens.push(new Token(type, text, state.line, startCol));
+    state.col += state.i - start;
+}
+
+function scanCharLiteral(state) {
+    const startCol = state.col;
+
+    state.i++; state.col++; // opening '
+
+    if (state.i >= state.source.length || state.source[state.i] === "\n") {
+      throw new Error(`Unterminated char literal at ${state.line}:${startCol}`);
+    }
+
+    const ch = state.source[state.i];
+
+    if (ch === "'") {
+      throw new Error(`Empty char literal at ${state.line}:${startCol}`);
+    }
+
+    state.i++; state.col++;
+
+    if (state.source[state.i] !== "'") {
+      throw new Error(`Multi-character char literal at ${state.line}:${startCol}`);
+    }
+
+    state.i++; state.col++;
+
+    state.tokens.push(
+      new Token(TokenType.CHAR_LITERAL, ch.charCodeAt(0), state.line, startCol)
+    );
+  }
+
+  function scanStringLiteral(state) {
+    const startLine = state.line;
+    const startCol = state.col;
+
+    state.i++; state.col++; // opening "
+
+    let value = "";
+
+    while (state.i < state.source.length && state.source[state.i] !== '"') {
+      if (state.source[state.i] === "\n") {
+        throw new Error(`Unterminated string literal at ${startLine}:${startCol}`);
+      }
+      value += state.source[state.i];
+      state.i++; state.col++;
+    }
+
+    if (state.i >= state.source.length) {
+      throw new Error(`Unterminated string literal at ${startLine}:${startCol}`);
+    }
+
+    state.i++; state.col++; // closing "
+
+    state.tokens.push(
+      new Token(TokenType.STRING_LITERAL, value, startLine, startCol)
+    );
+}
+
+export default function lex(source) {
+  const state = {
+    source,
+    tokens: [],
+    i: 0,
+    line: 1,
+    col: 1,
   };
 
-  while (i < source.length) {
-    const ch = source[i];
+  while (state.i < source.length) {
+    const ch = source[state.i];
 
     // whitespace
     if (ch === " " || ch === "\t" || ch === "\r") {
-      i++;
-      col++;
+      state.i++; state.col++;
       continue;
     }
 
     if (ch === "\n") {
-      i++;
-      line++;
-      col = 1;
+      state.i++; state.line++; state.col = 1;
       continue;
     }
 
     // numbers
-    if (/[0-9]/.test(ch)) {
-      let start = i;
-      while (/[0-9]/.test(source[i])) i++;
-      add(TokenType.NUMBER, source.slice(start, i));
-      col += i - start;
+    if (isDigit(ch)) {
+      scanNumber(state);
       continue;
     }
 
     // identifiers / keywords
-    if (/[a-zA-Z_]/.test(ch)) {
-      let start = i;
-      while (/[a-zA-Z0-9_]/.test(source[i])) i++;
-      const text = source.slice(start, i);
-
-      const keywords = {
-        int: TokenType.INT,
-        char: TokenType.CHAR,
-        return: TokenType.RETURN,
-        if: TokenType.IF,
-        else: TokenType.ELSE,
-        break: TokenType.BREAK,
-        continue: TokenType.CONTINUE,
-        while: TokenType.WHILE,
-        for: TokenType.FOR,
-        do: TokenType.DO,
-        out: TokenType.OUT,
-      };
-
-      add(keywords[text] ?? TokenType.IDENT, text);
-      col += i - start;
+    if (isIdentStart(ch)) {
+      scanIdentifier(state);
       continue;
     }
 
     // char literal
     if (ch === "'") {
-      const startCol = col;
-
-      i++;
-      col++;
-
-      if (i >= source.length || source[i] === "\n") {
-        throw new Error(`Unterminated char literal at ${line}:${startCol}`);
-      }
-
-      const charValue = source[i];
-
-      if (charValue === "'") {
-        throw new Error(`Empty char literal at ${line}:${startCol}`);
-      }
-
-      i++;
-      col++;
-
-      if (source[i] !== "'") {
-        throw new Error(`Multi-character char literal at ${line}:${startCol}`);
-      }
-
-      i++;
-      col++;
-
-      add(TokenType.CHAR_LITERAL, charValue.charCodeAt(0));
+      scanCharLiteral(state);
       continue;
     }
 
     // string literal
     if (ch === '"') {
-      const startLine = line;
-      const startCol = col;
-
-      i++;     // consume opening quote
-      col++;
-
-      let value = "";
-
-      while (i < source.length && source[i] !== '"') {
-        if (source[i] === "\n") {
-          throw new Error(`Unterminated string literal at ${startLine}:${startCol}`);
-        }
-
-        value += source[i];
-        i++;
-        col++;
-      }
-
-      if (i >= source.length) {
-        throw new Error(`Unterminated string literal at ${startLine}:${startCol}`);
-      }
-
-      // consume closing quote
-      i++;
-      col++;
-      
-      // add(TokenType.STRING_LITERAL, value);
-
-      tokens.push(  new Token(TokenType.STRING_LITERAL, value, startLine, startCol));
+      scanStringLiteral(state);
       continue;
     }
 
+    // two-char operators
+    const two = source.slice(state.i, state.i + 2);
+    const twoCharOps = {
+      "<=": TokenType.LE,
+      ">=": TokenType.GE,
+      "==": TokenType.EQ,
+      "!=": TokenType.NE,
+    };
 
-    // two char operators
-    const twoChar = source.slice(i, i + 2);
-
-    if (twoChar === "<=" || twoChar === ">=" ||
-        twoChar === "==" || twoChar === "!=") {
-
-      const map = {
-        "<=": TokenType.LE,
-        ">=": TokenType.GE,
-        "==": TokenType.EQ,
-        "!=": TokenType.NE
-      };
-
-      add(map[twoChar], twoChar);
-      i += 2;
-      col += 2;
+    if (twoCharOps[two]) {
+      state.tokens.push(
+        new Token(twoCharOps[two], two, state.line, state.col)
+      );
+      state.i += 2;
+      state.col += 2;
       continue;
     }
 
@@ -155,7 +171,7 @@ export default function lex(source) {
       "%": TokenType.PERCENT,
       "(": TokenType.LPAREN,
       ")": TokenType.RPAREN,
-      "[": TokenType.LBRACKET, 
+      "[": TokenType.LBRACKET,
       "]": TokenType.RBRACKET,
       "{": TokenType.LBRACE,
       "}": TokenType.RBRACE,
@@ -163,19 +179,20 @@ export default function lex(source) {
       ",": TokenType.COMMA,
       "=": TokenType.ASSIGN,
       "<": TokenType.LT,
-      ">": TokenType.GT
+      ">": TokenType.GT,
     };
 
     if (singles[ch]) {
-      add(singles[ch], ch);
-      i++;
-      col++;
+      state.tokens.push(
+        new Token(singles[ch], ch, state.line, state.col)
+      );
+      state.i++; state.col++;
       continue;
     }
 
-    throw new Error(`Unexpected character '${ch}' at ${line}:${col}`);
+    throw new Error(`Unexpected character '${ch}' at ${state.line}:${state.col}`);
   }
 
-  add(TokenType.EOF);
-  return tokens;
+  state.tokens.push(new Token(TokenType.EOF, null, state.line, state.col));
+  return state.tokens;
 }
