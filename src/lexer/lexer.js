@@ -18,6 +18,7 @@ const isDigit = ch => /[0-9]/.test(ch);
 const isIdentStart = ch => /[a-zA-Z_]/.test(ch);
 const isIdent = ch => /[a-zA-Z0-9_]/.test(ch);
 
+
 function scanNumber(state) {
     const startCol = state.col;
     const start = state.i;
@@ -68,9 +69,9 @@ function scanCharLiteral(state) {
     state.tokens.push(
       new Token(TokenType.CHAR_LITERAL, ch.charCodeAt(0), state.line, startCol)
     );
-  }
+}
 
-  function scanStringLiteral(state) {
+function scanStringLiteral(state) {
     const startLine = state.line;
     const startCol = state.col;
 
@@ -97,6 +98,50 @@ function scanCharLiteral(state) {
     );
 }
 
+function skipLineComment(state) {
+  state.i += 2;
+  state.col += 2;
+
+  while (state.i < state.source.length && state.source[state.i] !== "\n") {
+    state.i++;
+    state.col++;
+  }
+}
+
+function skipBlockComment(state) {
+  const startLine = state.line;
+  const startCol = state.col;
+
+  // assumes current char is '/' and next is '*'
+  state.i += 2;
+  state.col += 2;
+
+  while (state.i < state.source.length) {
+    if (state.source[state.i] === "\n") {
+      state.i++;
+      state.line++;
+      state.col = 1;
+      continue;
+    }
+
+    if (
+      state.source[state.i] === "*" &&
+      state.source[state.i + 1] === "/"
+    ) {
+      state.i += 2;
+      state.col += 2;
+      return;
+    }
+
+    state.i++;
+    state.col++;
+  }
+
+  throw new Error(
+    `Unterminated block comment at ${startLine}:${startCol}`
+  );
+}
+
 export default function lex(source) {
   const state = {
     source,
@@ -115,6 +160,18 @@ export default function lex(source) {
       continue;
     }
 
+    // singled lined comments
+    if (ch === "/" && state.source[state.i + 1] === "/") {
+      skipLineComment(state);
+      continue;
+    }
+    // blocked comments
+    if (ch === "/" && state.source[state.i + 1] === "*") {
+      skipBlockComment(state);
+      continue;
+    }
+
+    //next line
     if (ch === "\n") {
       state.i++; state.line++; state.col = 1;
       continue;
